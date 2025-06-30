@@ -1,2 +1,7 @@
-CUDA_VISIBLE_DEVICES=5 python3 src/main.py --config=qmix_bc --env-config=sc2 with env_args.map_name=3m \
-h5file_suffix=medium
+
+for i in {1..5}; do
+    echo "Run $i"
+    CUDA_VISIBLE_DEVICES=6 python3 src/main.py --config=qmix_bc --env-config=sc2 with env_args.map_name=3m \
+    h5file_suffix=medium
+done
+
