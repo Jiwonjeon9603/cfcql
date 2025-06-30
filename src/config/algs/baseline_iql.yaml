@@ -8,10 +8,11 @@ mask_before_softmax: True
 
 runner: "parallel"
 batch_size_run: 8 # batch_size_run=4, buffer_size = 2500, batch_size=64  for 3s5z_vs_3s6z
-t_max: 10050000
+t_max: 50000 #10050000
 
 buffer_size: 32
 batch_size: 128
+
 
 
 target_update_interval: 600

@@ -8,7 +8,7 @@ import torch as th
 from torch.optim import RMSprop, Adam
 import numpy as np
 from utils.th_utils import get_parameters_num
-
+import torch.nn.functional as F
 class NQLearner:
     def __init__(self, mac, scheme, logger, args):
         self.args = args

@@ -76,11 +76,19 @@ def run(_run, _config, _log):
             tb_exp_direc = os.path.join(tb_logs_direc,"{}", "{}").format(args.env,unique_token)
         logger.setup_tb(tb_exp_direc)
 
-
-    algo_name = args.name + "_" + args.env_args["map_name"] + "_" + args.h5file_suffix
+    if "cql" in args.name:
+        if args.raw_cql:
+            name = "macql"
+        else:
+            name = "cfcql"
+    else:
+        name = args.name
+    algo_name = name + "_" + args.env_args["map_name"] + "_" + args.h5file_suffix
 
     wandb.login(relogin=True, key='ad42a1cee565925e2b5065efe7e76c329b954a29')
-    wandb.init(project="0630-Original-Offline-MARL", group=args.env_args["map_name"], name=algo_name)
+    wandb.init(project="0631-Origianl-Offmarl", group=name, name=algo_name)
+
+
 
 
 
@@ -257,10 +265,11 @@ def run_sequential(args, logger):
     logger.console_logger.info("Beginning training for {} timesteps".format(args.t_max))
     if args.use_offline:
         data_dir=os.path.join(dirname(dirname(dirname(abspath(__file__)))), "dataset")
+
         total_datas,hdkey = load_datasets(args,logger,data_dir)
         #####################################
         if getattr(args, 'moderate_lambda', False):
-            train_behaviour_policy(argswandb,total_datas,logger,learner,runner,data_dir,hdkey,scheme, groups,preprocess)
+            train_behaviour_policy(args,total_datas,logger,learner,runner,data_dir,hdkey,scheme, groups,preprocess)
 
     while runner.t_env <= args.t_max:
 
@@ -273,7 +282,9 @@ def run_sequential(args, logger):
                     off_batch[key] = total_datas[key][sample_number].to(args.device)
                 else:
                     filled_sample = total_datas[key][sample_number].to(args.device)
-            runner.t_env+=int(filled_sample.sum().to('cpu'))
+
+            # runner.t_env+=int(filled_sample.sum().to('cpu'))
+            runner.t_env += 1
             runner._log(list(off_batch['reward'].sum(1).reshape(-1).to('cpu').numpy()),{"ep_length":filled_sample.sum().to('cpu').float(),"n_episodes":args.batch_size},'')
             new_batch = EpisodeBatch(scheme, groups, args.batch_size, runner.episode_limit + 1,preprocess=preprocess, device=args.device)
             new_batch.update(off_batch)
@@ -341,7 +352,7 @@ def run_sequential(args, logger):
             logger.print_recent_stats()
             
             last_log_T = runner.t_env
-    
+
     #qy: add final test
     runner.args.test_nepisode = runner.args.test_nepisode*20
     runner.test_returns = []
